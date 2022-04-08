@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
 using Raylib_cs;
 
 namespace AfterDarkScreensavers
 {
     public static class Entrypoint
     {
-        private static string farts;
-
         private static MethodInfo[] startMethods, renderMethods;
 
         private static void Main(string[] args)
