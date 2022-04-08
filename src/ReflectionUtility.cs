@@ -6,6 +6,9 @@ namespace AfterDarkScreensavers
 {
     internal static class ReflectionUtility
     {
+        /// <summary>
+        /// Get's all methods within the current assembly with the specified attribute. 
+        /// </summary>
         internal static MethodInfo[] GetMethodsWithAttribute<T>() where T : Attribute
         {
             List<MethodInfo> methods = new List<MethodInfo>();
@@ -27,6 +30,17 @@ namespace AfterDarkScreensavers
             }
 
             return methods.ToArray();
+        }
+
+        /// <summary>
+        /// Invokes every method within the specified array. 
+        /// </summary>
+        internal static void CallMethods(MethodInfo[] methods)
+        {
+            foreach (var method in methods)
+            {
+                method.Invoke(null, null);
+            }
         }
     }
 }

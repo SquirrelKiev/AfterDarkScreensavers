@@ -6,19 +6,23 @@ namespace AfterDarkScreensavers
 {
     public static class Entrypoint
     {
-        private static MethodInfo[] startMethods, renderMethods;
+        /// <summary>
+        /// Best to set this on PreRender as the background is cleared/set to this every frame. 
+        /// </summary>
+        public static Color BackgroundColor { get; set; } = Color.BLACK;
+
+        private static MethodInfo[] startMethods, renderMethods, preRenderMethods, postRenderMethods;
 
         private static void Main(string[] args)
         {
             startMethods = ReflectionUtility.GetMethodsWithAttribute<StartAttribute>();
             renderMethods = ReflectionUtility.GetMethodsWithAttribute<RenderAttribute>();
+            preRenderMethods = ReflectionUtility.GetMethodsWithAttribute<PreRenderAttribute>();
+            postRenderMethods = ReflectionUtility.GetMethodsWithAttribute<PostRenderAttribute>();
 
             Raylib.InitWindow(640, 480, "Screensaver");
 
-            foreach(var startMethod in startMethods)
-            {
-                startMethod.Invoke(null, null);
-            }
+            ReflectionUtility.CallMethods(startMethods);
 
             while (!Raylib.WindowShouldClose())
             {
@@ -28,16 +32,17 @@ namespace AfterDarkScreensavers
 
         private static void DrawScreen()
         {
+            ReflectionUtility.CallMethods(preRenderMethods);
+            
             Raylib.BeginDrawing();
             {
                 Raylib.ClearBackground(Color.BLACK);
 
-                foreach (var updateMethod in renderMethods)
-                {
-                    updateMethod.Invoke(null, null);
-                }
+                ReflectionUtility.CallMethods(renderMethods);
             }
             Raylib.EndDrawing();
+
+            ReflectionUtility.CallMethods(postRenderMethods);
         }
     }
 }
