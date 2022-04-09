@@ -13,4 +13,7 @@ namespace AfterDarkScreensavers
 
     [AttributeUsage(AttributeTargets.Method)]
     internal class PostRenderAttribute : Attribute { }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    internal class BeforeCloseAttribute : Attribute { }
 }

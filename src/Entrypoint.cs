@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using Raylib_cs;
 
 namespace AfterDarkScreensavers
@@ -11,7 +10,7 @@ namespace AfterDarkScreensavers
         /// </summary>
         public static Color BackgroundColor { get; set; } = Color.BLACK;
 
-        private static MethodInfo[] startMethods, renderMethods, preRenderMethods, postRenderMethods;
+        private static MethodInfo[] startMethods, renderMethods, preRenderMethods, postRenderMethods, beforeCloseMethods;
 
         private static void Main(string[] args)
         {
@@ -19,10 +18,13 @@ namespace AfterDarkScreensavers
             renderMethods = ReflectionUtility.GetMethodsWithAttribute<RenderAttribute>();
             preRenderMethods = ReflectionUtility.GetMethodsWithAttribute<PreRenderAttribute>();
             postRenderMethods = ReflectionUtility.GetMethodsWithAttribute<PostRenderAttribute>();
+            beforeCloseMethods = ReflectionUtility.GetMethodsWithAttribute<BeforeCloseAttribute>();
 
             Raylib.InitWindow(800, 600, "Screensaver");
 
             Raylib.SetTargetFPS(Raylib.GetMonitorRefreshRate(Raylib.GetCurrentMonitor()));
+
+            Raylib.InitAudioDevice();
 
             ReflectionUtility.CallMethods(startMethods);
 
@@ -30,6 +32,10 @@ namespace AfterDarkScreensavers
             {
                 DrawScreen();
             }
+
+            ReflectionUtility.CallMethods(beforeCloseMethods);
+            Raylib.CloseAudioDevice();
+            Raylib.CloseWindow();
         }
 
         private static void DrawScreen()
@@ -38,7 +44,7 @@ namespace AfterDarkScreensavers
             
             Raylib.BeginDrawing();
             {
-                Raylib.ClearBackground(Color.BLACK);
+                Raylib.ClearBackground(BackgroundColor);
 
                 ReflectionUtility.CallMethods(renderMethods);
             }

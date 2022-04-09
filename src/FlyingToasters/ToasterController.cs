@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
+using System.Reflection;
 using Raylib_cs;
 
 namespace AfterDarkScreensavers.FlyingToasters
@@ -12,10 +14,24 @@ namespace AfterDarkScreensavers.FlyingToasters
         private const float timeBetweenToasters = 2f;
 
         private static double lastToasterDepartureTime = 0;
-        private static List<Toaster> toasters = new List<Toaster>();
+        private static HashSet<Toaster> toasters = new HashSet<Toaster>();
 
-        [Render]
-        private static void Render()
+        private static Sound explosion;
+
+        [Start]
+        private static void Start()
+        {
+            explosion = Raylib.LoadSound($"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\Sounds\\snd_badexplosion.wav");
+        }
+
+        [BeforeClose]
+        private static void BeforeClose()
+        {
+            Raylib.UnloadSound(explosion);
+        }
+
+        [PreRender]
+        private static void PreRender()
         {
             if (lastToasterDepartureTime + timeBetweenToasters <= Raylib.GetTime())
             {
@@ -43,33 +59,61 @@ namespace AfterDarkScreensavers.FlyingToasters
             }
 
 
-            List<Toaster> toastersToRemove = null;
-
-            Raylib.DrawText($"{Math.Round(Raylib.GetTime() - lastToasterDepartureTime, 3)}", 10, 10, 36, Color.GREEN);
+            HashSet<Toaster> toastersToRemove = null;
 
             foreach (Toaster toaster in toasters)
             {
-                Raylib.DrawRectangle((int)toaster.position.X, (int)toaster.position.Y, 25, 25, Color.RAYWHITE);
-
                 toaster.position.X -= toaster.speed * Raylib.GetFrameTime();
                 toaster.position.Y += toaster.speed * 0.5f * Raylib.GetFrameTime();
 
                 if (toaster.position.X <= -25 || toaster.position.Y >= Raylib.GetScreenHeight())
                 {
                     Console.WriteLine($"Toaster sent to landfill at {Raylib.GetTime()}");
-                    if(toastersToRemove == null)
-                        toastersToRemove = new List<Toaster>();
+                    if (toastersToRemove == null)
+                        toastersToRemove = new HashSet<Toaster>();
 
                     toastersToRemove.Add(toaster);
                 }
+
+                foreach (Toaster toaster1 in toasters)
+                {
+                    if (toaster1 == toaster)
+                        continue;
+
+                    if (Raylib.CheckCollisionRecs(
+                        new Rectangle(toaster.position.X, toaster.position.Y, 25, 25),
+                        new Rectangle(toaster1.position.X, toaster1.position.Y, 25, 25)
+                        ))
+                    {
+                        if (toastersToRemove == null)
+                            toastersToRemove = new HashSet<Toaster>();
+
+                        if (!toastersToRemove.Contains(toaster))
+                            toastersToRemove.Add(toaster);
+
+                        if (!toastersToRemove.Contains(toaster1))
+                            toastersToRemove.Add(toaster1);
+
+                        Raylib.PlaySoundMulti(explosion);
+                    }
+                }
             }
 
-            if(toastersToRemove != null)
+            if (toastersToRemove != null)
             {
                 foreach (Toaster toaster in toastersToRemove)
                 {
                     toasters.Remove(toaster);
                 }
+            }
+        }
+
+        [Render]
+        private static void Render()
+        {
+            foreach (Toaster toaster in toasters)
+            {
+                Raylib.DrawRectangle((int)toaster.position.X, (int)toaster.position.Y, 25, 25, Color.RAYWHITE);
             }
         }
     }

@@ -9,4 +9,10 @@
     <PackageReference Include="Raylib-cs" Version="4.0.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Sounds\snd_badexplosion.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
