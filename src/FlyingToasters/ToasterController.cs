@@ -11,23 +11,29 @@ namespace AfterDarkScreensavers.FlyingToasters
     {
         private static Random random = new Random();
 
-        private const float timeBetweenToasters = 2f;
+        private const float timeBetweenToasters = 1f;
 
         private static double lastToasterDepartureTime = 0;
         private static HashSet<Toaster> toasters = new HashSet<Toaster>();
 
-        private static Sound explosion;
+        private static Sound explosionSound;
+
+        private static Texture2D explosionTexture;
+        private static List<AnimationTracker> explosionAnimators = new List<AnimationTracker>();
 
         [Start]
         private static void Start()
         {
-            explosion = Raylib.LoadSound($"{ReflectionUtility.AssemblyDirectory}\\Sounds\\snd_badexplosion.wav");
+            explosionTexture = Raylib.LoadTexture($"{ReflectionUtility.AssemblyDirectory}\\Sprites\\LazyExplosion\\explosion.png");
+
+            explosionSound = Raylib.LoadSound($"{ReflectionUtility.AssemblyDirectory}\\Sounds\\snd_badexplosion.wav");
         }
 
         [BeforeClose]
         private static void BeforeClose()
         {
-            Raylib.UnloadSound(explosion);
+            Raylib.UnloadSound(explosionSound);
+            Raylib.UnloadTexture(explosionTexture);
         }
 
         [PreRender]
@@ -95,7 +101,8 @@ namespace AfterDarkScreensavers.FlyingToasters
                         if (!toastersToRemove.Contains(toaster1))
                             toastersToRemove.Add(toaster1);
 
-                        Raylib.PlaySoundMulti(explosion);
+                        Raylib.PlaySoundMulti(explosionSound);
+                        explosionAnimators.Add(new AnimationTracker(explosionTexture, 17, toaster.position, false));
                     }
                 }
             }
@@ -115,6 +122,23 @@ namespace AfterDarkScreensavers.FlyingToasters
             foreach (Toaster toaster in toasters)
             {
                 Raylib.DrawRectangle((int)toaster.position.X, (int)toaster.position.Y, 25, 25, Color.RAYWHITE);
+            }
+
+            List<AnimationTracker> animatorsToRemove = null;
+
+            foreach(AnimationTracker animator in explosionAnimators)
+            {
+                if(animator.animationCompleted == false)
+                {
+                    animator.Render();
+                }
+                else
+                {
+                    if(animatorsToRemove == null)
+                        animatorsToRemove = new List<AnimationTracker>();
+
+                    animatorsToRemove.Add(animator);
+                }
             }
         }
     }
