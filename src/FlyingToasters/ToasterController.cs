@@ -21,7 +21,7 @@ namespace AfterDarkScreensavers.FlyingToasters
         [Start]
         private static void Start()
         {
-            explosion = Raylib.LoadSound($"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\Sounds\\snd_badexplosion.wav");
+            explosion = Raylib.LoadSound($"{ReflectionUtility.AssemblyDirectory}\\Sounds\\snd_badexplosion.wav");
         }
 
         [BeforeClose]
@@ -75,6 +75,7 @@ namespace AfterDarkScreensavers.FlyingToasters
                     toastersToRemove.Add(toaster);
                 }
 
+                // Not optimal but shouldn't be an issue
                 foreach (Toaster toaster1 in toasters)
                 {
                     if (toaster1 == toaster)

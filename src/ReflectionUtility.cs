@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 
 namespace AfterDarkScreensavers
 {
     internal static class ReflectionUtility
     {
+        public static readonly string AssemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
         /// <summary>
         /// Get's all methods within the current assembly with the specified attribute. 
         /// </summary>
