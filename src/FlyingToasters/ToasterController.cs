@@ -35,14 +35,13 @@ namespace AfterDarkScreensavers.FlyingToasters
                     toasterY = (int)(Raylib.GetScreenHeight() / 2 * (toastPosDecider - 1));
                 }
 
-                
-
                 Console.WriteLine($"Toaster departed at {Raylib.GetTime()} X: {toasterX} Y: {toasterY}");
 
                 toasters.Add(new Toaster(new Vector2(toasterX, toasterY)));
 
                 lastToasterDepartureTime = Raylib.GetTime();
             }
+
 
             List<Toaster> toastersToRemove = null;
 
