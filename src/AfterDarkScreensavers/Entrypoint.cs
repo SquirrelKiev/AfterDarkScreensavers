@@ -28,7 +28,7 @@ namespace AfterDarkScreensavers
                     // the magic number
                     secondArgument = firstArgument.Substring(3).Trim();
                     // /p /c /s
-                    firstArgument = secondArgument.Substring(0, 2);
+                    firstArgument = firstArgument.Substring(0, 2);
                 }
                 else if (args.Length > 1)
                     secondArgument = args[1];
@@ -58,7 +58,6 @@ namespace AfterDarkScreensavers
             }
             else // run as screensaver
             {
-                // ScreensaverMode();
                 ConfigMode();
             }
         }
