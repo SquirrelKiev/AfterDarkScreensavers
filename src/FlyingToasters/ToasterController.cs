@@ -11,22 +11,31 @@ namespace AfterDarkScreensavers.FlyingToasters
     {
         private static Random random = new Random();
 
-        private const float timeBetweenToasters = 2f;
+        private const float maxToasters = 20f;
+        private const float timeBetweenToasters = .5f;
 
         private static double lastToasterDepartureTime = 0;
         private static HashSet<Toaster> toasters = new HashSet<Toaster>();
 
         private static Sound explosionSound;
 
-        private static Texture2D explosionTexture;
+        public static Texture2D explosionTexture;
+
+        public static Texture2D[] toasterTextures;
+
         private static List<AnimationTracker> explosionAnimators = new List<AnimationTracker>();
 
         [Start]
         private static void Start()
         {
-            explosionTexture = Raylib.LoadTexture($"{ReflectionUtility.AssemblyDirectory}\\Sprites\\LazyExplosion\\explosion.png");
+            explosionTexture = Raylib.LoadTexture($"{ReflectionUtility.AssemblyDirectory}\\Sprites\\explosion.png");
 
             explosionSound = Raylib.LoadSound($"{ReflectionUtility.AssemblyDirectory}\\Sounds\\snd_badexplosion.wav");
+
+            toasterTextures = new Texture2D[]
+            {
+                Raylib.LoadTexture($"{ReflectionUtility.AssemblyDirectory}\\Sprites\\toaster.gif")
+            };
         }
 
         [BeforeClose]
@@ -39,7 +48,7 @@ namespace AfterDarkScreensavers.FlyingToasters
         [PreRender]
         private static void PreRender()
         {
-            if (lastToasterDepartureTime + timeBetweenToasters <= Raylib.GetTime())
+            if (toasters.Count < maxToasters && lastToasterDepartureTime + timeBetweenToasters <= Raylib.GetTime())
             {
                 double toastPosDecider = random.NextDouble() * 2;
 
@@ -48,13 +57,13 @@ namespace AfterDarkScreensavers.FlyingToasters
 
                 if (toastPosDecider <= 1)
                 {
-                    toasterX = (int)(Raylib.GetScreenWidth() / 2 * toastPosDecider) + Raylib.GetScreenWidth() / 2;
-                    toasterY = -10;
+                    toasterX = (int)(Raylib.GetScreenWidth() * toastPosDecider);
+                    toasterY = -30;
                 }
                 else
                 {
                     toasterX = Raylib.GetScreenWidth() + 10;
-                    toasterY = (int)(Raylib.GetScreenHeight() / 2 * (toastPosDecider - 1));
+                    toasterY = (int)(Raylib.GetScreenHeight() * (toastPosDecider - 1));
                 }
 
                 Console.WriteLine($"Toaster departed at {Raylib.GetTime()} X: {toasterX} Y: {toasterY}");
@@ -121,7 +130,7 @@ namespace AfterDarkScreensavers.FlyingToasters
         {
             foreach (Toaster toaster in toasters)
             {
-                Raylib.DrawRectangle((int)toaster.position.X, (int)toaster.position.Y, 25, 25, Color.RAYWHITE);
+                toaster.Render();
             }
 
             List<AnimationTracker> animatorsToRemove = null;
