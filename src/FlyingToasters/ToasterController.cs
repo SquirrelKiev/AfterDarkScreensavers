@@ -14,6 +14,8 @@ namespace AfterDarkScreensavers.FlyingToasters
         private const float maxToasters = 20f;
         private const float timeBetweenToasters = .5f;
 
+        private const int toasterCollisionSize = 48;
+
         private static double lastToasterDepartureTime = 0;
         private static HashSet<Toaster> toasters = new HashSet<Toaster>();
 
@@ -21,7 +23,7 @@ namespace AfterDarkScreensavers.FlyingToasters
 
         public static Texture2D explosionTexture;
 
-        public static Texture2D[] toasterTextures;
+        public static Dictionary<Toaster.ToastType, Texture2D[]> toasterTextures = new Dictionary<Toaster.ToastType, Texture2D[]>();
 
         private static List<AnimationTracker> explosionAnimators = new List<AnimationTracker>();
 
@@ -32,9 +34,16 @@ namespace AfterDarkScreensavers.FlyingToasters
 
             explosionSound = Raylib.LoadSound($"{ReflectionUtility.AssemblyDirectory}\\Sounds\\snd_badexplosion.wav");
 
-            toasterTextures = new Texture2D[]
+            toasterTextures[Toaster.ToastType.Toaster] = new Texture2D[]
             {
-                Raylib.LoadTexture($"{ReflectionUtility.AssemblyDirectory}\\Sprites\\toaster.gif")
+                Raylib.LoadTexture($"{ReflectionUtility.AssemblyDirectory}\\Sprites\\toaster.png")
+            };
+            toasterTextures[Toaster.ToastType.Toast] = new Texture2D[]
+            {
+                Raylib.LoadTexture($"{ReflectionUtility.AssemblyDirectory}\\Sprites\\toastlight.gif"),
+                Raylib.LoadTexture($"{ReflectionUtility.AssemblyDirectory}\\Sprites\\toastwell.gif"),
+                Raylib.LoadTexture($"{ReflectionUtility.AssemblyDirectory}\\Sprites\\toastverywell.gif"),
+                Raylib.LoadTexture($"{ReflectionUtility.AssemblyDirectory}\\Sprites\\toastburnt.gif")
             };
         }
 
@@ -50,20 +59,41 @@ namespace AfterDarkScreensavers.FlyingToasters
         {
             if (toasters.Count < maxToasters && lastToasterDepartureTime + timeBetweenToasters <= Raylib.GetTime())
             {
-                double toastPosDecider = random.NextDouble() * 2;
+                int toasterX = 0;
+                int toasterY = 0;
 
-                int toasterX;
-                int toasterY;
+                bool unsafeSpawn = true;
 
-                if (toastPosDecider <= 1)
+                while (unsafeSpawn)
                 {
-                    toasterX = (int)(Raylib.GetScreenWidth() * toastPosDecider);
-                    toasterY = -30;
-                }
-                else
-                {
-                    toasterX = Raylib.GetScreenWidth() + 10;
-                    toasterY = (int)(Raylib.GetScreenHeight() * (toastPosDecider - 1));
+                    unsafeSpawn = false;
+
+                    double toastPosDecider = random.NextDouble() * 2;
+
+                    if (toastPosDecider <= 1)
+                    {
+                        toasterX = (int)(Raylib.GetScreenWidth() * toastPosDecider);
+                        toasterY = -80;
+                    }
+                    else
+                    {
+                        toasterX = Raylib.GetScreenWidth() + 10;
+                        toasterY = (int)(Raylib.GetScreenHeight() * (toastPosDecider - 1));
+                    }
+
+                    int spawnCheckSize = toasterCollisionSize * 2;
+
+                    foreach (Toaster toaster in toasters)
+                    {
+                        if (Raylib.CheckCollisionRecs(
+                            new Rectangle(toasterX, toasterY, spawnCheckSize, spawnCheckSize),
+                            new Rectangle(toaster.position.X, toaster.position.Y, spawnCheckSize, spawnCheckSize)
+                            ))
+                        {
+                            Console.WriteLine($"failed against toaster at X {toaster.position.X} Y {toaster.position.Y}. My pos is X {toasterX} Y {toasterY}");
+                            unsafeSpawn = true;
+                        }
+                    }
                 }
 
                 Console.WriteLine($"Toaster departed at {Raylib.GetTime()} X: {toasterX} Y: {toasterY}");
@@ -81,7 +111,7 @@ namespace AfterDarkScreensavers.FlyingToasters
                 toaster.position.X -= toaster.speed * Raylib.GetFrameTime();
                 toaster.position.Y += toaster.speed * 0.5f * Raylib.GetFrameTime();
 
-                if (toaster.position.X <= -25 || toaster.position.Y >= Raylib.GetScreenHeight())
+                if (toaster.position.X <= -64 || toaster.position.Y >= Raylib.GetScreenHeight())
                 {
                     Console.WriteLine($"Toaster sent to landfill at {Raylib.GetTime()}");
                     if (toastersToRemove == null)
@@ -97,8 +127,8 @@ namespace AfterDarkScreensavers.FlyingToasters
                         continue;
 
                     if (Raylib.CheckCollisionRecs(
-                        new Rectangle(toaster.position.X, toaster.position.Y, 25, 25),
-                        new Rectangle(toaster1.position.X, toaster1.position.Y, 25, 25)
+                        new Rectangle(toaster.position.X, toaster.position.Y, toasterCollisionSize, toasterCollisionSize),
+                        new Rectangle(toaster1.position.X, toaster1.position.Y, toasterCollisionSize, toasterCollisionSize)
                         ))
                     {
                         if (toastersToRemove == null)
@@ -110,7 +140,7 @@ namespace AfterDarkScreensavers.FlyingToasters
                         if (!toastersToRemove.Contains(toaster1))
                             toastersToRemove.Add(toaster1);
 
-                        Raylib.PlaySoundMulti(explosionSound);
+                        Raylib.PlaySound(explosionSound);
                         explosionAnimators.Add(new AnimationTracker(explosionTexture, 17, toaster.position, false));
                     }
                 }
@@ -135,15 +165,15 @@ namespace AfterDarkScreensavers.FlyingToasters
 
             List<AnimationTracker> animatorsToRemove = null;
 
-            foreach(AnimationTracker animator in explosionAnimators)
+            foreach (AnimationTracker animator in explosionAnimators)
             {
-                if(animator.animationCompleted == false)
+                if (animator.animationCompleted == false)
                 {
                     animator.Render();
                 }
                 else
                 {
-                    if(animatorsToRemove == null)
+                    if (animatorsToRemove == null)
                         animatorsToRemove = new List<AnimationTracker>();
 
                     animatorsToRemove.Add(animator);

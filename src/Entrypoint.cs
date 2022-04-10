@@ -21,7 +21,9 @@ namespace AfterDarkScreensavers
             postRenderMethods = ReflectionUtility.GetMethodsWithAttribute<PostRenderAttribute>();
             beforeCloseMethods = ReflectionUtility.GetMethodsWithAttribute<BeforeCloseAttribute>();
 
-            Raylib.InitWindow(800, 600, "Screensaver");
+            Raylib.InitWindow(1920, 1080, "Screensaver");
+
+            Raylib.DisableCursor();
 
             Raylib.SetTargetFPS(Raylib.GetMonitorRefreshRate(Raylib.GetCurrentMonitor()));
 
