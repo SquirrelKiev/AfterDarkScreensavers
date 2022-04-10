@@ -52,6 +52,13 @@ namespace AfterDarkScreensavers.FlyingToasters
         {
             Raylib.UnloadSound(explosionSound);
             Raylib.UnloadTexture(explosionTexture);
+            foreach (Texture2D[] textures in toasterTextures.Values)
+            {
+                foreach(var texture in textures)
+                {
+                    Raylib.UnloadTexture(texture);
+                }
+            }
         }
 
         [PreRender]
