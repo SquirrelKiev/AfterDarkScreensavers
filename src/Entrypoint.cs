@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using Raylib_cs;
 
 namespace AfterDarkScreensavers
@@ -28,9 +29,16 @@ namespace AfterDarkScreensavers
 
             ReflectionUtility.CallMethods(startMethods);
 
+            bool firstFramePassed = false;
+
             while (!Raylib.WindowShouldClose())
             {
                 DrawScreen();
+
+                if (Raylib.GetMouseDelta() != System.Numerics.Vector2.Zero && firstFramePassed == true)
+                    break;
+
+                firstFramePassed = true;
             }
 
             ReflectionUtility.CallMethods(beforeCloseMethods);

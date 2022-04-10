@@ -11,7 +11,7 @@ namespace AfterDarkScreensavers.FlyingToasters
     {
         private static Random random = new Random();
 
-        private const float timeBetweenToasters = 1f;
+        private const float timeBetweenToasters = 2f;
 
         private static double lastToasterDepartureTime = 0;
         private static HashSet<Toaster> toasters = new HashSet<Toaster>();
