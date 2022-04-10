@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using Raylib_cs;
+using System.Windows.Forms;
 
 namespace AfterDarkScreensavers
 {
@@ -34,7 +35,7 @@ namespace AfterDarkScreensavers
 
                 if (firstArgument == "/c") // Config mode
                 {
-
+                    ConfigMode();
                 }
                 else if (firstArgument == "/p") // Preview mode
                 {
@@ -57,8 +58,16 @@ namespace AfterDarkScreensavers
             }
             else // run as screensaver
             {
-                ScreensaverMode();
+                // ScreensaverMode();
+                ConfigMode();
             }
+        }
+
+        private static void ConfigMode()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Config.ConfigForm());
         }
 
         private static void PreviewMode(IntPtr previewWindowHandle)
